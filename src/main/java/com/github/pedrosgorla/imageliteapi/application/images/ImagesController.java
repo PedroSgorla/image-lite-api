@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,8 @@ public class ImagesController {
 
     private final ImageService service;
 
+    private final ImageMapper mapper;
+
     @PostMapping
     public ResponseEntity save(
             @RequestParam("file") MultipartFile file,
@@ -34,16 +38,21 @@ public class ImagesController {
 
         log.info("Image received: name: {}, size: {}", file.getOriginalFilename(), file.getSize());
 
-        Image image = Image.builder()
-                .name(name)
-                .tags(String.join(",", tags))
-                .size(file.getSize())
-                .extension(ImageExtension.valueOf(MediaType.valueOf(file.getContentType())))
-                .file(file.getBytes())
-                .build();
+        Image image = mapper.mapToImage(file,name, tags);
 
-        service.save(image);
+        Image savedImage = service.save(image);
 
-        return ResponseEntity.ok().build();
+        URI imageURI = buildImageURL(savedImage);
+
+        return ResponseEntity.created(imageURI).build();
+    }
+
+    private URI buildImageURL(Image image){
+        String imagePath = "/" + image.getId();
+        return ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path(imagePath)
+                .build()
+                .toUri();
     }
 }

@@ -1,5 +1,6 @@
 package com.github.pedrosgorla.imageliteapi.domain.enums;
 
+import com.github.pedrosgorla.imageliteapi.domain.exception.InvalidExtensionException;
 import lombok.Getter;
 import org.springframework.http.MediaType;
 
@@ -25,5 +26,16 @@ public enum ImageExtension {
                 .orElse(null);
     }
 
+    public static ImageExtension ofName(String name){
+        if(name == null || name.isBlank()){
+            return null;
+        }
+        try {
+            return valueOf(name.trim().toUpperCase());
+        }
+        catch (IllegalArgumentException e){
+            throw new InvalidExtensionException("Invalid extension: " + name);
+        }
+    }
 }
 

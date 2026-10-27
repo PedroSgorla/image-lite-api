@@ -13,5 +13,5 @@ public class ImageDTO {
     private String name;
     private String extension;
     private Long size;
-    private LocalDate uploadData;
+    private LocalDate uploadDate;
 }

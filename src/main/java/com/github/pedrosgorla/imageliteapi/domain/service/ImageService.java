@@ -13,4 +13,5 @@ public interface ImageService {
     Optional<Image> getById(String id);
 
     List<Image> search (ImageExtension extension, String query);
+
 }

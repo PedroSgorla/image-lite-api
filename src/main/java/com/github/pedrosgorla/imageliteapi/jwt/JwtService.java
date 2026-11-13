@@ -2,6 +2,7 @@ package com.github.pedrosgorla.imageliteapi.jwt;
 
 import com.github.pedrosgorla.imageliteapi.domain.AccessToken;
 import com.github.pedrosgorla.imageliteapi.domain.entity.User;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
@@ -48,4 +49,19 @@ public class JwtService {
         claims.put("name", user.getName());
         return claims;
     }
+
+    public String getEmailFromToken(String tokenJwt){
+        try{
+            return Jwts.parser()
+                    .verifyWith(secretKeyGenerator.getKey())
+                    .build()
+                    .parseSignedClaims(tokenJwt)
+                    .getPayload()
+                    .getSubject();
+        }catch (JwtException e){
+            throw new InvalidTokenException(e.getMessage());
+        }
+
+    }
+
 }

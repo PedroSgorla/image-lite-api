@@ -61,7 +61,6 @@ public class JwtService {
         }catch (JwtException e){
             throw new InvalidTokenException(e.getMessage());
         }
-
     }
 
 }

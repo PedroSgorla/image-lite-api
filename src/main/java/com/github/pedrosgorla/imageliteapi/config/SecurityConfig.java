@@ -1,5 +1,8 @@
 package com.github.pedrosgorla.imageliteapi.config;
 
+import com.github.pedrosgorla.imageliteapi.config.filter.JwtFilter;
+import com.github.pedrosgorla.imageliteapi.domain.service.UserService;
+import com.github.pedrosgorla.imageliteapi.jwt.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -8,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -17,12 +21,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
+    public JwtFilter jwtFilter(JwtService jwtService, UserService userService){
+        return new JwtFilter(jwtService,userService);
+    }
+
+    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtFilter jwtFilter) throws Exception{
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configure(httpSecurity))
@@ -30,6 +39,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/v1/users/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
